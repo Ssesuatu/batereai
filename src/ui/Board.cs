@@ -258,7 +258,7 @@ public sealed class Board:Window {
   foreach(var b in new[]{launchBtn,fitBtn,refreshBtn,pinBtn,closeBtn})right.Children.Add(b);
   pinBtn.Margin=new Thickness(2,0,2,0);
   Grid.SetColumn(right,2);td.Children.Add(right);
-  var appIcon=AppIcon(18);if(appIcon!=null){appIcon.Margin=new Thickness(0,0,8,0);DockPanel.SetDock(appIcon,Dock.Left);left.Children.Add(appIcon);}
+  var appIcon=AppIcon(20);if(appIcon!=null){appIcon.Margin=new Thickness(0,0,8,0);DockPanel.SetDock(appIcon,Dock.Left);left.Children.Add(appIcon);}
   var tt=Theme.Text("Batereai",Theme.TextSm,FontWeights.SemiBold,Theme.Foreground);tt.TextTrimming=TextTrimming.None;DockPanel.SetDock(tt,Dock.Left);left.Children.Add(tt);
   var sep=new Border{Width=1,Height=16,Background=Theme.Border,Margin=new Thickness(14,0,14,0),VerticalAlignment=VerticalAlignment.Center};DockPanel.SetDock(sep,Dock.Left);left.Children.Add(sep);
   nowBox=new Border{Background=Theme.Accent,CornerRadius=new CornerRadius(8),Padding=new Thickness(10,5,11,5),HorizontalAlignment=HorizontalAlignment.Left,VerticalAlignment=VerticalAlignment.Center};

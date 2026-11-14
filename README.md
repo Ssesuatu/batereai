@@ -1,3 +1,5 @@
+<img src="assets/batereai-256.png" alt="Batereai logo" width="64" height="64">
+
 # Batereai
 
 **Know how much AI quota you have left before you hit send.**
