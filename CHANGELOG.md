@@ -14,3 +14,4 @@ First public release.
   T3 Code window is visible.
 - The tray icon uses the Batereai icon instead of the generic Windows information icon.
 - `--selftest` pill montage now renders each pill at its real width.
+- No longer crashes when T3 Code has never run on the machine (no `settings.json` or `caches` folder yet).

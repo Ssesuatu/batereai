@@ -30,11 +30,11 @@ public sealed class DataCore:IDisposable {
  public Snapshot LoadOnce(){lock(gate){return Load();}}
  void Reload(bool activeOnly){if(disposed)return;try{lock(gate){if(disposed)return;Snapshot next;if(activeOnly){var act=LoadActive(current.Providers);next=new Snapshot(current.Providers,act,SameActive(act,current.Active)?(IDictionary<string,string>)current.LastModels:LoadLastModels(),LoadCache(act));}else next=Load();string sig=Serialize(new {next.Providers,next.Active,next.LastModels,Cache=next.Cache==null?"":next.Cache.Key()});if(sig==signature)return;signature=sig;current=next;}var h=SnapshotChanged;if(h!=null)h(this,EventArgs.Empty);}catch(Exception e){Log.Error("Reload",e);if(!disposed)try{fullTimer.Signal();}catch(ObjectDisposedException){}}}
  readonly Dictionary<string,Tuple<long,long,JsonObj>> jsonCache=new Dictionary<string,Tuple<long,long,JsonObj>>();
- JsonObj ReadCached(string path){var f=new FileInfo(path);Tuple<long,long,JsonObj> old;if(jsonCache.TryGetValue(path,out old)&&old.Item1==f.LastWriteTimeUtc.Ticks&&old.Item2==f.Length)return old.Item3;var value=Read(path);jsonCache[path]=Tuple.Create(f.LastWriteTimeUtc.Ticks,f.Length,value);return value;}
+ JsonObj ReadCached(string path){var f=new FileInfo(path);if(!f.Exists)return new JsonObj();Tuple<long,long,JsonObj> old;if(jsonCache.TryGetValue(path,out old)&&old.Item1==f.LastWriteTimeUtc.Ticks&&old.Item2==f.Length)return old.Item3;var value=Read(path);jsonCache[path]=Tuple.Create(f.LastWriteTimeUtc.Ticks,f.Length,value);return value;}
  Snapshot Load(){
  var settings=ReadCached(Path.Combine(Home,"userdata","settings.json"));var instances=settings.GetObj("providerInstances")??new JsonObj();var prefs=settings.GetObj("providerModelPreferences")??new JsonObj();
  var order=new List<string>{"codex","claudeAgent"};order.AddRange(instances.OrderedKeys.Where(k=>!order.Contains(k)));var providers=new List<Provider>();
- foreach(var file in Directory.GetFiles(Path.Combine(Home,"caches"),"*.json")){
+ foreach(var file in Directory.Exists(Path.Combine(Home,"caches"))?Directory.GetFiles(Path.Combine(Home,"caches"),"*.json"):new string[0]){
  try{var raw=ReadCached(file);var d=raw.GetObj("data")??raw;string id=d.GetString("instanceId")??Path.GetFileNameWithoutExtension(file),driver=d.GetString("driver")??id;
  var cfg=instances.GetObj(id);if(!order.Contains(id))continue;
  var ul=raw.GetObj("usageLimits")??d.GetObj("usageLimits");DateTime? stamp=Date(ul==null?null:ul.GetString("checkedAt"))??Date(d.GetString("checkedAt"));

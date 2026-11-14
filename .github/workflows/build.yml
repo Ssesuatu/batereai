@@ -13,24 +13,33 @@ jobs:
   build:
     runs-on: windows-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
 
       - name: Build
         shell: pwsh
         run: powershell -NoProfile -ExecutionPolicy Bypass -File build\build.ps1
 
+      # The runner has no T3 Code install, so both suites also prove Batereai starts without T3 data.
       - name: Regression suite
         shell: pwsh
         run: |
-          $p = Start-Process bin\Batereai.exe -ArgumentList '--check', "$pwd\out\checks" -PassThru -Wait
-          Get-Content out\checks\checks.json
+          New-Item -ItemType Directory out -Force | Out-Null
+          $p = Start-Process bin\Batereai.exe -ArgumentList '--check', "$pwd\out\checks" -PassThru -Wait -RedirectStandardOutput out\check.out -RedirectStandardError out\check.err
+          Get-Content out\check.out, out\check.err -ErrorAction SilentlyContinue
+          Get-Content out\checks\checks.json -ErrorAction SilentlyContinue
           if ($p.ExitCode -ne 0) { throw "--check failed with exit code $($p.ExitCode)" }
 
       - name: Selftest renders
         shell: pwsh
         run: |
-          $p = Start-Process bin\Batereai.exe -ArgumentList '--selftest', "$pwd\out\selftest" -PassThru -Wait
-          if ($p.ExitCode -ne 0) { throw "--selftest failed with exit code $($p.ExitCode)" }
+          $p = Start-Process bin\Batereai.exe -ArgumentList '--selftest', "$pwd\out\selftest" -PassThru -Wait -RedirectStandardOutput out\selftest.out -RedirectStandardError out\selftest.err
+          Get-Content out\selftest.err -ErrorAction SilentlyContinue
+          if ($p.ExitCode -ne 0) { Get-Content out\selftest.out -ErrorAction SilentlyContinue; throw "--selftest failed with exit code $($p.ExitCode)" }
+
+      - name: App log
+        if: failure()
+        shell: pwsh
+        run: Get-Content "$env:LOCALAPPDATA\t3-usage\t3usage.log" -ErrorAction SilentlyContinue
 
       - name: Package
         shell: pwsh
@@ -40,6 +49,7 @@ jobs:
           Get-FileHash "out\Batereai-$v-win-x64.zip" -Algorithm SHA256 | ForEach-Object { "$($_.Hash.ToLower())  Batereai-$v-win-x64.zip" } | Set-Content "out\Batereai-$v-win-x64.zip.sha256"
 
       - uses: actions/upload-artifact@v4
+        if: always()
         with:
           name: batereai
           path: |
