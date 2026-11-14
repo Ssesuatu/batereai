@@ -9,8 +9,8 @@ T3 Code's model picker and shows, for the model you are about to use:
 - **WARM / COLD**: whether that model's prompt cache is still warm, with a countdown.
 - **CTX**: how full the conversation's context window is.
 
-Press **Ctrl+Alt+U** (or click the tray icon) to open the board: one card per provider with every
-usage window and model, so you can pick the account that still has room.
+Press **Ctrl+Alt+U**, click the tray icon, or run `Batereai.exe` again to open the board: one card
+per provider with every usage window and model, so you can pick the account that still has room.
 
 ![Batereai board](docs/board.png)
 
@@ -28,8 +28,9 @@ usage window and model, so you can pick the account that still has room.
    `.sha256` file next to it.
 2. Extract it anywhere you can write to, for example `%LOCALAPPDATA%\Programs\Batereai`.
    Keep the `fonts` folder next to `Batereai.exe`.
-3. Run `Batereai.exe`. No admin rights are needed. Right-click the tray icon and pick
-   **Start with Windows** if you want it to start at sign-in.
+3. Run `Batereai.exe`. No admin rights are needed; it starts in the system tray, and running
+   `Batereai.exe` again opens the board. Right-click the tray icon and pick **Start with Windows**
+   if you want it to start quietly at sign-in.
 
 To uninstall, untick **Start with Windows**, quit from the tray menu and delete the folder.
 Settings and logs live in `%LOCALAPPDATA%\t3-usage`.

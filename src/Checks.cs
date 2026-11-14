@@ -28,8 +28,15 @@ internal static class Checks {
   Step("tracker",TrackerRecovery);
   Step("fixture",()=>Fixture(directory));
   Step("ipc",()=>{string exe=System.Reflection.Assembly.GetExecutingAssembly().Location;
-   for(int i=0;i<3;i++){Environment.SetEnvironmentVariable("T3USAGE_SESSION","Check"+Guid.NewGuid().ToString("N"));Environment.SetEnvironmentVariable("T3USAGE_IPCTEST","1");var sw=Stopwatch.StartNew();using(var primary=Process.Start(new ProcessStartInfo(exe){UseShellExecute=false,CreateNoWindow=true})){
-    while(!InstanceChannel.ElectionExists()&&sw.ElapsedMilliseconds<5000)Thread.Sleep(2);int open=Child(exe,"-Open"),quit=Child(exe,"--quit");bool exited=primary.WaitForExit(5000);Assert(open==0&&quit==0&&exited,"ipc-immediate-"+i,new {open,quit,exited,elapsedMs=sw.Elapsed.TotalMilliseconds});}}});
+   string prevSession=Environment.GetEnvironmentVariable("T3USAGE_SESSION"),prevTest=Environment.GetEnvironmentVariable("T3USAGE_IPCTEST");
+   try{for(int i=0;i<3;i++){string countFile=Path.GetFullPath(Path.Combine(directory,"ipc-"+i+".count"));if(File.Exists(countFile))File.Delete(countFile);
+    Environment.SetEnvironmentVariable("T3USAGE_SESSION","Check"+Guid.NewGuid().ToString("N"));Environment.SetEnvironmentVariable("T3USAGE_IPCTEST",countFile);
+    var sw=Stopwatch.StartNew();using(var primary=Process.Start(new ProcessStartInfo(exe){UseShellExecute=false,CreateNoWindow=true})){
+     while(!InstanceChannel.ElectionExists()&&sw.ElapsedMilliseconds<5000)Thread.Sleep(2);
+     int bare=Child(exe,""),bg=Child(exe,"--background"),open=Child(exe,"-Open"),quit=Child(exe,"--quit");
+     bool exited=primary.WaitForExit(5000);int opens=0;if(File.Exists(countFile)){opens=int.Parse(File.ReadAllText(countFile).Trim());File.Delete(countFile);}
+     Assert(bare==0&&bg==0&&open==0&&quit==0&&opens==2&&exited,"ipc-immediate-"+i,new {bare,bg,open,quit,opens,exited,elapsedMs=sw.Elapsed.TotalMilliseconds});}}}
+   finally{Environment.SetEnvironmentVariable("T3USAGE_SESSION",prevSession);Environment.SetEnvironmentVariable("T3USAGE_IPCTEST",prevTest);}});
   return failures==0?0:1;
  }catch(Exception e){results.Add(new {error=e.ToString()});return 1;}finally{File.WriteAllText(Path.Combine(directory,"checks.json"),DataCore.Serialize(results));Console.WriteLine(DataCore.Serialize(results));}}
  // Same cases as T3 Code's derivePromptCacheWarmth table. Row: status, usage updatedAt, reportsCache, expiresAt, ttlMs, completedAt.

@@ -48,20 +48,24 @@ public static class App {
  try{if(args.Contains("--check"))return Checks.Run(args.Length>1?args[1]:"checks");if(args.Contains("--selftest"))return SelfTest(args);
  if(Detach(args))return 0;
  using(var channel=new InstanceChannel()){
+ bool wantsQuit=args.Any(a=>a.Equals("--quit",StringComparison.OrdinalIgnoreCase));
+ bool bg=args.Any(a=>a.Equals("--background",StringComparison.OrdinalIgnoreCase));
  bool wantsOpen=args.Any(a=>a.Equals("-Open",StringComparison.OrdinalIgnoreCase)||a.StartsWith("t3usage:",StringComparison.OrdinalIgnoreCase));
- if(!channel.Primary){AllowSetForegroundWindow(-1);return channel.Send(args.Contains("--quit"),wantsOpen);}if(args.Contains("--quit"))return 0;
+ if(!channel.Primary){AllowSetForegroundWindow(-1);return channel.Send(wantsQuit,!wantsQuit&&!bg);}if(wantsQuit)return 0;
  var open=channel.Open;var quit=channel.Quit;
  Log.Info("Startup PID "+System.Diagnostics.Process.GetCurrentProcess().Id);FreeConsole();var app=new Application{ShutdownMode=ShutdownMode.OnExplicitShutdown};app.DispatcherUnhandledException+=(s,e)=>{Log.Error("Dispatcher",e.Exception);e.Handled=true;};
  // Listen before the slow setup (tray, pill, UIA): requests are acknowledged on receipt and run once the dispatcher pumps.
- bool ipcTest=Environment.GetEnvironmentVariable("T3USAGE_IPCTEST")=="1";
- var ow=ThreadPool.RegisterWaitForSingleObject(open,(s,b)=>{channel.Ack.Set();app.Dispatcher.BeginInvoke(new Action(()=>{try{if(ipcTest)return;if(ui!=null)ui.OpenPopover();else pendingOpen=true;}catch(Exception ex){Log.Error("IPC open",ex);}}));},null,-1,false);
+ string ipcEnv=Environment.GetEnvironmentVariable("T3USAGE_IPCTEST")??"";
+ bool ipcTest=ipcEnv!=""&&ipcEnv!="0";int ipcOpens=0;
+ var ow=ThreadPool.RegisterWaitForSingleObject(open,(s,b)=>{if(ipcTest&&ipcEnv!="1")try{File.WriteAllText(ipcEnv,Interlocked.Increment(ref ipcOpens).ToString());}catch{}channel.Ack.Set();app.Dispatcher.BeginInvoke(new Action(()=>{try{if(ipcTest)return;if(ui!=null)ui.OpenPopover();else pendingOpen=true;}catch(Exception ex){Log.Error("IPC open",ex);}}));},null,-1,false);
  var qw=ThreadPool.RegisterWaitForSingleObject(quit,(s,b)=>{channel.Ack.Set();app.Dispatcher.BeginInvoke(new Action(()=>app.Shutdown()));new Thread(()=>{Thread.Sleep(5000);Log.Info("Quit forced: UI thread still busy");Environment.Exit(0);}){IsBackground=true}.Start();},null,-1,false);
  channel.Listening();
  using(var data=new DataCore())using(var tracker=new T3Window(app.Dispatcher))using(var tray=new Forms.NotifyIcon())using(var hot=new Hotkey(()=>{if(ui is PillWindow)((PillWindow)ui).KeyboardOpen=true;if(ui!=null)ui.TogglePopover();})){
  Log.Info("Tray initialized");var pill=new PillWindow();ui=pill;ui.Bind(data,tracker,new T3Driver(tracker));Log.Info("Pill bound");Kiro.StartBackground(data.Refresh);
  var menu=new Forms.ContextMenuStrip();menu.Items.Add("Open usage",null,(s,e)=>ui.OpenPopover());menu.Items.Add("Refresh",null,(s,e)=>data.Refresh());
+ string exe=System.Reflection.Assembly.GetExecutingAssembly().Location;
  var startup=new Forms.ToolStripMenuItem("Start with Windows"){CheckOnClick=true};using(var k=Registry.CurrentUser.OpenSubKey(RunKey))startup.Checked=k!=null&&k.GetValue("T3Usage")!=null;
- startup.Click+=(s,e)=>{try{using(var k=Registry.CurrentUser.CreateSubKey(RunKey)){if(startup.Checked)k.SetValue("T3Usage","\""+System.Reflection.Assembly.GetExecutingAssembly().Location+"\"");else k.DeleteValue("T3Usage",false);}}catch(Exception ex){Log.Error("Startup",ex);}};menu.Items.Add(startup);menu.Items.Add("Quit",null,(s,e)=>app.Shutdown());tray.Icon=System.Drawing.Icon.ExtractAssociatedIcon(System.Reflection.Assembly.GetExecutingAssembly().Location)??System.Drawing.SystemIcons.Information;tray.Text="Batereai";tray.ContextMenuStrip=menu;tray.DoubleClick+=(s,e)=>ui.OpenPopover();tray.Visible=true;ui.AttachTray(tray);
+ startup.Click+=(s,e)=>{try{using(var k=Registry.CurrentUser.CreateSubKey(RunKey)){if(startup.Checked)k.SetValue("T3Usage","\""+exe+"\" --background");else k.DeleteValue("T3Usage",false);}}catch(Exception ex){Log.Error("Startup",ex);}};menu.Items.Add(startup);menu.Items.Add("Quit",null,(s,e)=>app.Shutdown());tray.Icon=System.Drawing.Icon.ExtractAssociatedIcon(exe)??System.Drawing.SystemIcons.Information;tray.Text="Batereai";tray.ContextMenuStrip=menu;tray.DoubleClick+=(s,e)=>ui.OpenPopover();tray.Visible=true;ui.AttachTray(tray);
  data.Start();tracker.Start();var warmup=new DispatcherTimer{Interval=TimeSpan.FromSeconds(5)};warmup.Tick+=(s,e)=>{warmup.Stop();Log.Info("Warmup complete");};warmup.Start();if((wantsOpen||pendingOpen)&&!ipcTest)ui.OpenPopover();Log.Info("Started PID "+System.Diagnostics.Process.GetCurrentProcess().Id);app.Run();ow.Unregister(null);qw.Unregister(null);tray.Visible=false;pill.Close();menu.Dispose();Log.Info("Stopped");}
 }return 0;
  }catch(Exception e){Log.Error("Fatal",e);Console.Error.WriteLine(e);return 1;}}

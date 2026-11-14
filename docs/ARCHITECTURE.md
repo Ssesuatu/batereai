@@ -34,8 +34,8 @@ flowchart LR
 
 | File | Role |
 | :--- | :--- |
-| `src/App.cs` | Entry point, single-instance election, tray menu, `--check` / `--selftest` switches |
-| `src/InstanceChannel.cs` | Named mutex and events so a second launch (`-Open`, `--quit`, `t3usage:` links) talks to the running instance |
+| `src/App.cs` | Entry point, single-instance election, tray menu, `--background` / `--quit` / `--check` / `--selftest` switches |
+| `src/InstanceChannel.cs` | Named mutex and events so a second launch opens the board (bare launch, `-Open`, `t3usage:` links), stays quiet (`--background`), or stops the running instance (`--quit`) |
 | `src/DataCore.cs` | Loads provider quota caches, settings and the active thread; publishes immutable `Snapshot`s |
 | `src/Model.cs` | Snapshot types and `UsageMath` (headline percentage, ties, prompt-cache state) |
 | `src/Sqlite.cs` | Minimal read-only wrapper over `winsqlite3.dll` |
@@ -79,7 +79,7 @@ unchanged: the `T3Usage` namespace, `T3USAGE_*` environment variables, the `t3us
 | :--- | :--- |
 | `T3CODE_HOME` | T3 Code data folder, if not `~/.t3` |
 | `T3USAGE_SESSION` | Suffix for the single-instance names, used by tests to run isolated instances |
-| `T3USAGE_IPCTEST` | Test mode for the IPC checks (no UI is opened) |
+| `T3USAGE_IPCTEST` | Test mode for the IPC checks (no UI is opened; when set to a file path, records received open signals) |
 | `T3USAGE_NOTRIM` | `0` enables background working-set trimming |
 | `T3USAGE_RENDER` | `hw` uses WPF hardware rendering; the default is software rendering |
 
