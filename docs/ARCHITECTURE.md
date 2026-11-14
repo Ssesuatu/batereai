@@ -43,7 +43,7 @@ flowchart LR
 | `src/Kiro.cs` | Runs `kiro-cli chat --no-interactive /usage` in the background and caches the result |
 | `src/T3Window.cs` | Finds the T3 Code window and its model picker with UI Automation |
 | `src/Reliability.cs` | Dedicated UIA thread with a watchdog, so a hung T3 window cannot freeze Batereai |
-| `src/T3Driver.cs` | Opens T3's own model picker from the pill menu |
+| `src/T3Driver.cs` | Drives T3's own model picker through UI Automation: opens it from the pill menu and switches the model when you click a model row on the board |
 | `src/T3Launcher.cs` | Starts T3 Code when it is not running |
 | `src/T3Refresh.cs` | Asks the local T3 server to refresh its providers (manual refresh only) |
 | `src/Checks.cs` | Regression suite behind `--check` |

@@ -101,7 +101,7 @@ public static class Level {
  public static Brush QuotaMeter(int? left,bool stale){return stale?(Brush)Stale:left.HasValue?(Brush)quotaGrads[Of(left.Value)]:Theme.Muted;}
 }
 
-// Indonesian strings and small formatting rules used by the UI.
+// UI strings and small formatting rules.
 public static class UiText {
  public static string Age(DateTime? utc,DateTime now){
   if(!utc.HasValue)return "never";var d=now-utc.Value;if(d<TimeSpan.Zero)d=TimeSpan.Zero;
@@ -131,7 +131,7 @@ public static class UiText {
 public sealed class Family {
  public string Key,Name;public readonly List<UsageModel> Models=new List<UsageModel>();public List<UsageWindow> Windows=new List<UsageWindow>();public UsageResult Headline;
  public static List<Family> For(Provider p,DateTime now){
-  var list=new List<Family>{new Family{Key="gemini",Name="Gemini"},new Family{Key="3p",Name="Claude & GPT"},new Family{Key="argon",Name="Argon"},new Family{Key="other",Name="Lainnya"}};
+  var list=new List<Family>{new Family{Key="gemini",Name="Gemini"},new Family{Key="3p",Name="Claude & GPT"},new Family{Key="argon",Name="Argon"},new Family{Key="other",Name="Other"}};
   foreach(var m in p.Models){string s=(m.Slug??"").ToLowerInvariant();string k=s.Contains("argon")?"argon":s.StartsWith("gemini")?"gemini":Regex.IsMatch(s,"^(claude|gpt)")?"3p":"other";list.First(f=>f.Key==k).Models.Add(m);}
   var result=new List<Family>();
   foreach(var f in list){
@@ -176,7 +176,7 @@ public sealed class Ring:FrameworkElement {
  }
 }
 
-// Provider glyphs: Kiro and Claude paths from T3's Icons.js, Antigravity from ag_icon.png, otherwise a colour dot.
+// Provider glyphs: Kiro and Claude paths from T3's Icons.js, Antigravity from an optional ag_icon.png next to the exe (not shipped), otherwise a colour dot.
 public static class Glyphs {
  static readonly Dictionary<string,ImageSource> cache=new Dictionary<string,ImageSource>();
  public static FrameworkElement For(Provider p,double size){

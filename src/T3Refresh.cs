@@ -38,12 +38,12 @@ public static class T3Refresh {
   }
  }
  public static async Task RefreshAsync(string home){
-  var runtime=DataCore.Read(Path.Combine(home,"userdata","server-runtime.json"));
+  var runtime=DataCore.Read(Path.Combine(home,"userdata","server-runtime.json"))??new JsonObj();
   Uri origin;
   if(!Uri.TryCreate(runtime.GetString("origin"),UriKind.Absolute,out origin)||!origin.IsLoopback||origin.Scheme!="http")throw new IOException("Local T3 server not found");
   string sessionId=null;
   try{
-   var session=SimpleJson.ParseObject(Cli(home,"issue --scope orchestration:read --ttl 2m --label Batereai-refresh --json"));
+   var session=SimpleJson.ParseObject(Cli(home,"issue --scope orchestration:read --ttl 2m --label Batereai-refresh --json"))??new JsonObj();
    sessionId=session.GetString("sessionId");string token=session.GetString("token");
    if(string.IsNullOrEmpty(token)||string.IsNullOrEmpty(sessionId))throw new IOException("T3 refresh session unavailable");
    using(var timeout=new CancellationTokenSource(TimeSpan.FromSeconds(90)))using(var ws=new ClientWebSocket()){

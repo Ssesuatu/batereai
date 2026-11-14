@@ -19,7 +19,8 @@ usage window and model, so you can pick the account that still has room.
 - Windows 10 or 11 (x64). .NET Framework 4.8 is already part of Windows.
 - [T3 Code](https://github.com/pingdotgg/t3code) installed and signed in to at least one provider.
   Batereai reads the quota data T3 Code already collects; it has no accounts of its own.
-- Optional: `kiro-cli` on `PATH` for Kiro credit usage.
+- Optional: Kiro CLI installed at `%LOCALAPPDATA%\Kiro-Cli\kiro-cli.exe` (its default location) for
+  Kiro credit usage.
 
 ## Install
 
@@ -39,7 +40,7 @@ Settings and logs live in `%LOCALAPPDATA%\t3-usage`.
 ## Build from source
 
 ```powershell
-git clone https://github.com/<you>/batereai.git
+git clone https://github.com/Ssesuatu/batereai.git
 cd batereai
 powershell -ExecutionPolicy Bypass -File build\build.ps1
 .\bin\Batereai.exe
@@ -51,8 +52,12 @@ The build uses the C# compiler that ships with .NET Framework (`csc.exe`), so no
 
 ```powershell
 .\bin\Batereai.exe --check  .\out\checks     # regression suite, writes checks.json, exit code 1 on failure
-.\bin\Batereai.exe --selftest .\out\selftest # renders the pill and board states to PNG with sample data
+.\bin\Batereai.exe --selftest .\out\selftest # renders pill and board states to PNG
 ```
+
+`--selftest` renders sample data, and also your live T3 Code data and window (`board-live*.png`)
+when T3 Code is present. It briefly opens real windows on screen. Check live PNGs for account names
+before sharing them.
 
 `tracker-hang-recovery` needs a visible T3 Code window on the same desktop and is reported as
 skipped when there is none (for example on CI).

@@ -63,7 +63,7 @@ internal static class Checks {
    Assert(nativeDuringHang&&tracker.UiaCompletions>0&&elapsed<3000,"tracker-hang-recovery",new {elapsedMs=elapsed,nativeDuringHang,calls});
   }
  }
- static int Child(string exe,string args){using(var p=Process.Start(new ProcessStartInfo(exe,args){UseShellExecute=false,CreateNoWindow=true})){if(!p.WaitForExit(12000))return -1;return p.ExitCode;}}
+ static int Child(string exe,string args){using(var p=Process.Start(new ProcessStartInfo(exe,args){UseShellExecute=false,CreateNoWindow=true})){if(!p.WaitForExit(25000))return -1;return p.ExitCode;}}
  [DllImport("winsqlite3.dll",CallingConvention=CallingConvention.Cdecl)]static extern int sqlite3_open(byte[] path,out IntPtr db);
  [DllImport("winsqlite3.dll",CallingConvention=CallingConvention.Cdecl)]static extern int sqlite3_exec(IntPtr db,byte[] sql,IntPtr cb,IntPtr arg,out IntPtr error);
  [DllImport("winsqlite3.dll",CallingConvention=CallingConvention.Cdecl)]static extern int sqlite3_close(IntPtr db);

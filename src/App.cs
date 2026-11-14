@@ -55,7 +55,7 @@ public static class App {
  // Listen before the slow setup (tray, pill, UIA): requests are acknowledged on receipt and run once the dispatcher pumps.
  bool ipcTest=Environment.GetEnvironmentVariable("T3USAGE_IPCTEST")=="1";
  var ow=ThreadPool.RegisterWaitForSingleObject(open,(s,b)=>{channel.Ack.Set();app.Dispatcher.BeginInvoke(new Action(()=>{try{if(ipcTest)return;if(ui!=null)ui.OpenPopover();else pendingOpen=true;}catch(Exception ex){Log.Error("IPC open",ex);}}));},null,-1,false);
- var qw=ThreadPool.RegisterWaitForSingleObject(quit,(s,b)=>{channel.Ack.Set();app.Dispatcher.BeginInvoke(new Action(()=>app.Shutdown()));},null,-1,false);
+ var qw=ThreadPool.RegisterWaitForSingleObject(quit,(s,b)=>{channel.Ack.Set();app.Dispatcher.BeginInvoke(new Action(()=>app.Shutdown()));new Thread(()=>{Thread.Sleep(5000);Log.Info("Quit forced: UI thread still busy");Environment.Exit(0);}){IsBackground=true}.Start();},null,-1,false);
  channel.Listening();
  using(var data=new DataCore())using(var tracker=new T3Window(app.Dispatcher))using(var tray=new Forms.NotifyIcon())using(var hot=new Hotkey(()=>{if(ui is PillWindow)((PillWindow)ui).KeyboardOpen=true;if(ui!=null)ui.TogglePopover();})){
  Log.Info("Tray initialized");var pill=new PillWindow();ui=pill;ui.Bind(data,tracker,new T3Driver(tracker));Log.Info("Pill bound");Kiro.StartBackground(data.Refresh);

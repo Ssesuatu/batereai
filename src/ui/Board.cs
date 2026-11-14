@@ -119,7 +119,7 @@ public static class ModelLogo {
  }
 }
 
-// Indonesian labels used by the board.
+// Labels used by the board.
 public static class BoardText {
  // "235.57/693" -> "236 / 693".
  public static string Detail(string d){

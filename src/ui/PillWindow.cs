@@ -62,7 +62,7 @@ public sealed class PillModel {
  }
 }
 
-// The pill itself: a fixed-width ghost button copied from T3's model trigger (see DESIGN.md).
+// The pill itself: a fixed-width ghost button copied from T3's model trigger.
 public sealed class PillView:Border {
  public static readonly double PctSlot=Math.Ceiling(Theme.Measure("100%",Theme.TextSm,FontWeights.Medium));
  public static readonly double AuxSlot=Math.Ceiling(new[]{"\u21BB 29d 23h","awaiting","stale","no quota","loading\u2026"}.Max(s=>Theme.Measure(s,Theme.TextSm,FontWeights.Normal)));

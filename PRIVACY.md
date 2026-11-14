@@ -17,7 +17,9 @@ leaves your computer.
 
 | Where | What | When |
 | :--- | :--- | :--- |
-| `%LOCALAPPDATA%\t3-usage\` | Log (`t3usage.log`, rotated at 1 MB), board layout, Kiro usage cache, primary-instance PID file | Always |
+| `%LOCALAPPDATA%\t3-usage\` | Log (`t3usage.log`, rotated at 1 MB) and primary-instance PID file | Always |
+| `%LOCALAPPDATA%\t3-usage\board-layout.json` | Card order and collapsed model lists | When you reorder or collapse cards on the board |
+| `%LOCALAPPDATA%\t3-usage\kiro.json` | Last Kiro credit reading | Only when Kiro CLI is installed and returns usage |
 | `HKCU\Software\Microsoft\Windows\CurrentVersion\Run\T3Usage` | Autostart entry | Only if you enable *Start with Windows* |
 | `~/.t3/userdata/settings.json` | The `enabled` flag of a provider | Only when you turn a provider on or off in Batereai. A backup is kept as `settings.json.t3usage.bak`. |
 

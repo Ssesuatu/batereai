@@ -14,4 +14,7 @@ First public release.
   T3 Code window is visible.
 - The tray icon uses the Batereai icon instead of the generic Windows information icon.
 - `--selftest` pill montage now renders each pill at its real width.
-- No longer crashes when T3 Code has never run on the machine (no `settings.json` or `caches` folder yet).
+- No longer crashes when T3 Code has never run on the machine (no `settings.json` or `caches` folder yet),
+  and starts watching T3's folders once they appear.
+- `--quit` always ends the running instance within about 5 seconds, even while it is still starting up.
+- Empty or half-written `settings.json` / `server-runtime.json` no longer cause errors.
